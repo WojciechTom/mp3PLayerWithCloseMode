@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controllers.MainController">
+   <bottom>
+      <fx:include fx:id="controlPane" source="controlPane.fxml" />
+   </bottom>
+   <right>
+      <fx:include fx:id="controlClosePane" source="controlClosePane.fxml" />
+   </right>
+   <center>
+      <fx:include fx:id="songListPane" source="songListPane.fxml" />
+   </center>
+</BorderPane>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="anchor-pane-css" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controllers.SongListPaneController">
+   <children>
+      <TableView id="list-view-css" fx:id="SongTableView" stylesheets="@style.css" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+         <columns>
+            <TableColumn fx:id="LpColumn" maxWidth="-Infinity" minWidth="20.0" prefWidth="20.0" text="Lp" />
+            <TableColumn fx:id="NameColumn" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="115.0" resizable="false" text="Name" />
+            <TableColumn fx:id="TimeColumn" maxWidth="43.0" minWidth="19.0" prefWidth="43.0" text="Time" />
+         </columns></TableView>
+   </children>
+</AnchorPane>
