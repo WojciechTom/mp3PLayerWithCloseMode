@@ -13,7 +13,6 @@ import java.io.*;
 public class Mp3Parser {
 
     public Song createMp3SongFromFile(File file){
-
         MP3File mp3file = null;
         Double duration = null;
 
@@ -41,7 +40,6 @@ public class Mp3Parser {
         }
 
         Song song = new Song(file.getName(), duration, file.getAbsolutePath() );
-
         return song;
     }
 }

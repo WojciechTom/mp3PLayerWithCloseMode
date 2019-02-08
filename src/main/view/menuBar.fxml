@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controllers.MenuBarController">
+   <children>
+      <MenuBar AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Song">
+            <items>
+              <MenuItem fx:id="AddSong" mnemonicParsing="false" text="Add Song" />
+                  <MenuItem fx:id="DeleteSong" mnemonicParsing="false" text="Delete Song" />
+                  <MenuItem fx:id="DeleteAllSongs" mnemonicParsing="false" text="Delete All Songs" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="List">
+            <items>
+              <MenuItem fx:id="SaveList" mnemonicParsing="false" text="Save List" />
+                  <MenuItem fx:id="OpenList" mnemonicParsing="false" text="Open List" />
+                  <MenuItem fx:id="CloseList" mnemonicParsing="false" text="Close List" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </children>
+</AnchorPane>

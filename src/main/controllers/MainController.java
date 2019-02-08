@@ -32,10 +32,14 @@ public class MainController implements Initializable {
     private ControlClosePaneController controlClosePaneController;
     @FXML
     private SongListPaneController songListPaneController;
+    @FXML
+    private MenuBarController menuBarController;
     private Mp3Player mp3Player;
     private ObservableList<Song> tabelka;
     private Mp3Parser mp3Parser;
     private int currentSong = 0;
+    private int index;
+
 
 
     @Override
@@ -44,10 +48,78 @@ public class MainController implements Initializable {
         configControlPane();
         configTable();
         configClosePane();
+        configMenuBar();
     }
+
+
 
 //--------------------------------------------------------------------------------------------------------------------------
 
+    private void configMenuBar() {
+        MenuItem itemSaveList = menuBarController.getSaveList();
+        MenuItem itemOpenList = menuBarController.getOpenList();
+        MenuItem itemCloseList = menuBarController.getCloseList();
+        MenuItem itemAddSong = menuBarController.getAddSong();
+        MenuItem itemDelSong = menuBarController.getDeleteSong();
+        MenuItem itemDelAllSongs = menuBarController.getDeleteAllSongs();
+
+
+        itemSaveList.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                mp3Player.getMp3List().saveListToFile();
+            }
+        });
+
+
+        itemOpenList.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                mp3Player.getMp3List().readListFromFile();
+            }
+        });
+
+
+        itemCloseList.setOnAction(Event -> {
+            mp3Player.getMp3List().getLista().clear();
+            mp3Player.stopSong();
+        });
+
+
+        itemAddSong.setOnAction(Event -> {
+            mp3Parser = new Mp3Parser();
+            File file = mp3Player.getMp3List().addSongFile();
+            mp3Player.getMp3List().addSong(mp3Parser.createMp3SongFromFile(file));
+        });
+
+
+        itemDelAllSongs.setOnAction(Event -> mp3Player.getMp3List().getLista().clear());
+
+
+
+
+
+
+
+
+
+    }
+
+    private void configMp3Player() {
+        mp3Player.getMediaPlayer().setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                if(mp3Player.getMp3List().getSongList().size() > index+1){
+                    index++;
+                    mp3Player.loadSong(index);
+                    configSlideBar();
+                    configMp3Player();
+                } else {
+                    mp3Player.getMediaPlayer().stop();
+                }
+            }
+        });
+    }
 
     private void configControlPane (){
         Button playBut = controlPaneController.getPlayStopButton();
@@ -100,17 +172,18 @@ public class MainController implements Initializable {
         });
 
 
-        //przechwytywanie akcji z przycisku PLAY wersja skrócona
+        //przechwytywanie akcji z przycisku PLAY
         playBut.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 int index = tabela.getSelectionModel().getSelectedIndex();
-                System.out.println("to wskazuje index "  + index);
                 if (index == -1 ) {
                     index = 0;
                 }
                 mp3Player.loadSong(index);
                 configSlideBar();
+                configMp3Player();
+
             }
         });
 
@@ -122,10 +195,10 @@ public class MainController implements Initializable {
                 tabela.getSelectionModel().select(tabela.getSelectionModel().getSelectedIndex()+1);
                 mp3Player.loadSong(tabela.getSelectionModel().getSelectedIndex());
                 configSlideBar();
+                configMp3Player();
             }
         });
     }
-
 
 
 
@@ -143,32 +216,6 @@ public class MainController implements Initializable {
         nameKol.setCellValueFactory(new PropertyValueFactory<Song, String>("title"));
         timeKol.setCellValueFactory(new PropertyValueFactory<Song, String>("time"));
         tabela.setItems(mp3Player.getMp3List().getSongList());
-
-                                            //        nameKol.setCellFactory(column -> {
-                                            //         return new TableCell<Song, String>(){
-                                            //             @Override
-                                            //             protected void updateItem(String item, boolean empty){
-                                            //                 super.updateItem(item, empty);
-                                            //
-                                            //                 if (item == null || empty) {
-                                            //                     setText(null);
-                                            //                     setStyle("");
-                                            //                 } else {
-                                            //                     setText(item);
-                                            //                 }
-                                            //
-                                            //                 Song piosenka = getTableView().getItems().get(getIndex());
-                                            //
-                                            //                 if(piosenka.getTitle().equals("Dua Lipa - Be The One")){
-                                            //                     setTextFill(Color.BLUE);
-                                            //                     setStyle( "-fx-background-color: yellow");
-                                            //                 } else {
-                                            //                 }
-                                            //             }
-                                            //
-                                            //         };
-                                            //        }
-                                            //        );
 
 
 
@@ -218,9 +265,11 @@ public class MainController implements Initializable {
             public void handle(MouseEvent event) {
                 if(event.getClickCount() == 2 ){
 
-                    int index = tabela.getSelectionModel().getSelectedIndex();
+                    index = tabela.getSelectionModel().getSelectedIndex();
                     mp3Player.loadSong(index);
+                    mp3Player.getMediaPlayer();
                     configSlideBar();
+                    configMp3Player();
                 }
             }
         });
