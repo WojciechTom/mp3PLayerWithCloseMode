@@ -67,8 +67,8 @@ public class CloseSerwis implements Runnable {
             }
 
         if(check){
-            System.out.println("FIRE!!!!!!!!!!!!");
-            //  shutDownComputer();
+            System.out.println("The Computer is shutting down");
+              shutDownComputer();
         }
 
 

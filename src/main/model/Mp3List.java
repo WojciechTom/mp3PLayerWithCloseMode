@@ -32,6 +32,8 @@ public class Mp3List {
         return lista;
     }
 
+
+
     public File addSongFile(){
         FileChooser fc = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("MP3 files (*.mp3)", "*.mp3");

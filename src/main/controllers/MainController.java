@@ -5,6 +5,7 @@ import javafx.beans.binding.StringExpression;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,14 +13,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
+import javafx.scene.image.Image;
+import javafx.scene.input.*;
+import javafx.util.Callback;
 import javafx.util.Duration;
 import main.model.*;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 
@@ -39,6 +41,9 @@ public class MainController implements Initializable {
     private Mp3Parser mp3Parser;
     private int currentSong = 0;
     private int index;
+    boolean onList = false;
+    private int movedSongIndex;
+
 
 
 
@@ -62,6 +67,7 @@ public class MainController implements Initializable {
         MenuItem itemAddSong = menuBarController.getAddSong();
         MenuItem itemDelSong = menuBarController.getDeleteSong();
         MenuItem itemDelAllSongs = menuBarController.getDeleteAllSongs();
+        TableView tabela = songListPaneController.getSongTableView();
 
 
         itemSaveList.setOnAction(new EventHandler<ActionEvent>() {
@@ -93,13 +99,15 @@ public class MainController implements Initializable {
         });
 
 
+        itemDelSong.setOnAction(Event -> {
+            index = tabela.getSelectionModel().getSelectedIndex();
+            if(index != -1){
+                mp3Player.getMp3List().getLista().remove(index);
+            }
+        });
+
+
         itemDelAllSongs.setOnAction(Event -> mp3Player.getMp3List().getLista().clear());
-
-
-
-
-
-
 
 
 
@@ -216,6 +224,13 @@ public class MainController implements Initializable {
         nameKol.setCellValueFactory(new PropertyValueFactory<Song, String>("title"));
         timeKol.setCellValueFactory(new PropertyValueFactory<Song, String>("time"));
         tabela.setItems(mp3Player.getMp3List().getSongList());
+        tabela.setRowFactory(new Callback<TableView, TableRow>() {
+            @Override
+            public TableRow call(TableView param) {
+                return new SongRow();
+            }
+        });
+
 
 
 
@@ -231,9 +246,47 @@ public class MainController implements Initializable {
         });
 
 
+        //NEW dodawanie
+        tabela.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                index = tabela.getSelectionModel().getSelectedIndex();
+                System.out.println("mouse pressed " + index);
+            }
+        });
+
+
+        tabela.setOnDragDetected(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                movedSongIndex = tabela.getSelectionModel().getSelectedIndex();
+                Dragboard db = tabela.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent cb = new ClipboardContent();
+                String path = mp3Player.getMp3List().getLista().get(index).getPath();
+                List<File> fileList = new ArrayList<File>();
+                fileList.add(new File(path));
+                onList = true;
+
+                cb.putFiles(fileList);
+                db.setContent(cb);
+
+                event.consume();
+            }
+        });
+
+        tabela.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+            }
+        });
+
+
         tabela.setOnDragDropped(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
+                if(onList){
+                    mp3Player.getMp3List().getLista().remove(movedSongIndex);
+                }
                 event.acceptTransferModes(TransferMode.ANY);
                 Dragboard db = event.getDragboard();
                 boolean success = false;
@@ -278,6 +331,95 @@ public class MainController implements Initializable {
 
     }
 
+
+
+
+    private class SongRow extends TableRow<Song>{
+        TableRow thisRow = this;
+
+        public SongRow() {
+
+            setOnDragDetected(event -> {
+                if (getItem() == null) {
+                    return;
+                }
+
+                Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(getItem().toString());
+                Image photo = new Image("main/resources/next.png");
+                dragboard.setDragView(photo);
+                dragboard.setContent(content);
+
+                event.consume();
+            });
+
+
+            setOnDragOver(event -> {
+                if (event.getGestureSource() != thisRow &&
+                        event.getDragboard().hasString()) {
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+
+                event.consume();
+            });
+
+
+
+            setOnDragEntered(event -> {
+                if (event.getGestureSource() != thisRow &&
+                        event.getDragboard().hasString()) {
+                    setOpacity(0.3);
+                }
+            });
+
+
+            setOnDragExited(event -> {
+                if (event.getGestureSource() != thisRow &&
+                        event.getDragboard().hasString()) {
+                    setOpacity(1);
+                }
+            });
+
+
+            setOnDragDropped(event -> {
+                if (getItem() == null) {
+                    return;
+                }
+
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+
+                if (db.hasString()) {
+                    ObservableList<Song> items = getTableView().getItems();
+                    ObservableList<String> itemsStr = FXCollections.observableArrayList();
+                    for (Song p : items) {
+                        itemsStr.add(p.toString());
+                    }
+
+                    int draggedIdx = itemsStr.indexOf(db.getString());
+                    int thisIdx = itemsStr.indexOf(getItem().toString());
+
+                    System.out.println(draggedIdx + " indeks ciagniety");
+                    System.out.println(thisIdx + " indeks drugi");
+
+                    if(draggedIdx<thisIdx) {
+                        mp3Player.getMp3List().getLista().add(thisIdx, mp3Player.getMp3List().getLista().get(draggedIdx) );
+                        mp3Player.getMp3List().getLista().remove(draggedIdx);
+                    } else {
+                        mp3Player.getMp3List().getLista().add(thisIdx, mp3Player.getMp3List().getLista().get(draggedIdx) );
+                        mp3Player.getMp3List().getLista().remove(draggedIdx+1);
+                    }
+                    success = true;
+                }
+                event.setDropCompleted(success);
+
+                event.consume();
+            });
+
+
+        }
+    }
 
 
 
@@ -375,9 +517,5 @@ public class MainController implements Initializable {
         });
     }
 
-
-
 //---------------------------------------------------------------------------------------------------------------------------------
-
-
 }
