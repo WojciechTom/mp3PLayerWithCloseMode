@@ -46,7 +46,6 @@ public class MainController implements Initializable {
 
 
 
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         mp3Player = new Mp3Player();
