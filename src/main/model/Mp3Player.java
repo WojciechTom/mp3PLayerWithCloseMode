@@ -11,11 +11,15 @@ public class Mp3Player {
     private Media media;
     private MediaPlayer mediaPlayer;
     private Mp3List mp3List;
+    private double volume;
 
     public Mp3Player() {
         mp3List = new Mp3List();
     }
 
+    public double getVolume() {
+        return volume;
+    }
 
 
     public MediaPlayer getMediaPlayer() {
@@ -46,6 +50,7 @@ public class Mp3Player {
 
     public void setVolume(double volume){
         mediaPlayer.setVolume(volume);
+        this.volume = volume;
     }
 
     public void loadSong(int index){
@@ -56,6 +61,13 @@ public class Mp3Player {
         Song song = getMp3List().getSongList().get(index);
         media = new Media( new File(song.getPath()).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
+        if (this.getVolume() == 0.0) {
+            this.setVolume(0.15);
+        } else {
+            mediaPlayer.setVolume(this.getVolume());
+        }
+
+        System.out.println("ustawienie głosnosci na " + this.getVolume());
         mediaPlayer.setAutoPlay(true);
 
     }

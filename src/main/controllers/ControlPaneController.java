@@ -18,8 +18,10 @@ public class ControlPaneController implements Initializable {
     private Button PrevButton;
 
     @FXML
-    private Button PlayStopButton;
+    private Button PlayPauseButton;
 
+    @FXML
+    private Button StopButton;
 
     @FXML
     private Button NextButton;
@@ -37,6 +39,13 @@ public class ControlPaneController implements Initializable {
     private Slider SongTimeSlider;
 
 
+    public Button getStopButton() {
+        return StopButton;
+    }
+
+    public void setStopButton(Button stopButton) {
+        StopButton = stopButton;    }
+
     public Button getPrevButton() {
         return PrevButton;
     }
@@ -44,12 +53,12 @@ public class ControlPaneController implements Initializable {
     public void setPrevButton(Button prevButton) {
         PrevButton = prevButton;    }
 
-    public Button getPlayStopButton() {
-        return PlayStopButton;
+    public Button getPlayPauseButton() {
+        return PlayPauseButton;
     }
 
-    public void setPlayStopButton(Button playStopButton) {
-        PlayStopButton = playStopButton;
+    public void setPlayPauseButton(Button playPauseButton) {
+        PlayPauseButton = playPauseButton;
     }
 
     public Button getNextButton() {

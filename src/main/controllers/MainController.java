@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
+import javafx.scene.media.MediaPlayer;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import main.model.*;
@@ -129,7 +130,8 @@ public class MainController implements Initializable {
     }
 
     private void configControlPane (){
-        Button playBut = controlPaneController.getPlayStopButton();
+        Button playPauseBut = controlPaneController.getPlayPauseButton();
+        Button stopBut = controlPaneController.getStopButton();
         Button prevBut = controlPaneController.getPrevButton();
         Button nextBut = controlPaneController.getNextButton();
         Slider volSlid = controlPaneController.getVolumeSlider();
@@ -141,7 +143,7 @@ public class MainController implements Initializable {
 
 
 
-        //bindowanie suwaka głosności
+        //bindowanie suwaka głosności z labelem
         volSlid.setValue(30);
         StringProperty labV = volLab.textProperty();
         StringExpression slidV = Bindings.format("Volume: %.0f",  volSlid.valueProperty());
@@ -175,22 +177,41 @@ public class MainController implements Initializable {
                 tabela.getSelectionModel().select(tabela.getSelectionModel().getSelectedIndex()-1);
                 mp3Player.loadSong(tabela.getSelectionModel().getSelectedIndex());
                 configSlideBar();
+                playPauseBut.setOpacity(1);
+                System.out.println("głośność na " + mp3Player.getMediaPlayer().getVolume());
             }
         });
 
 
         //przechwytywanie akcji z przycisku PLAY
-        playBut.setOnAction(new EventHandler<ActionEvent>() {
+        playPauseBut.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                int index = tabela.getSelectionModel().getSelectedIndex();
-                if (index == -1 ) {
-                    index = 0;
-                }
-                mp3Player.loadSong(index);
-                configSlideBar();
-                configMp3Player();
 
+                if(mp3Player.getMediaPlayer() == null){
+                    int index = tabela.getSelectionModel().getSelectedIndex();
+                    if (index == -1 ) {
+                        index = 0;
+                    }
+                    mp3Player.loadSong(index);
+                    configSlideBar();
+                    configMp3Player();
+                } else if (mp3Player.getMediaPlayer().getStatus() == MediaPlayer.Status.PLAYING) {
+                    mp3Player.getMediaPlayer().pause();
+                    playPauseBut.setOpacity(0.3);
+                } else {
+                    System.out.println("if drugi");
+                    mp3Player.getMediaPlayer().play();
+                    playPauseBut.setOpacity(1);
+                }
+            }
+        });
+
+        stopBut.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                mp3Player.stopSong();
+                playPauseBut.setOpacity(1);
             }
         });
 
@@ -203,6 +224,7 @@ public class MainController implements Initializable {
                 mp3Player.loadSong(tabela.getSelectionModel().getSelectedIndex());
                 configSlideBar();
                 configMp3Player();
+                playPauseBut.setOpacity(1);
             }
         });
     }
@@ -231,9 +253,6 @@ public class MainController implements Initializable {
         });
 
 
-
-
-
         //dodanie akcji przeciągnięcia
         tabela.setOnDragOver(new EventHandler<DragEvent>() {
             @Override
@@ -244,40 +263,6 @@ public class MainController implements Initializable {
             }
         });
 
-
-        //NEW dodawanie
-        tabela.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                index = tabela.getSelectionModel().getSelectedIndex();
-                System.out.println("mouse pressed " + index);
-            }
-        });
-
-
-        tabela.setOnDragDetected(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                movedSongIndex = tabela.getSelectionModel().getSelectedIndex();
-                Dragboard db = tabela.startDragAndDrop(TransferMode.MOVE);
-                ClipboardContent cb = new ClipboardContent();
-                String path = mp3Player.getMp3List().getLista().get(index).getPath();
-                List<File> fileList = new ArrayList<File>();
-                fileList.add(new File(path));
-                onList = true;
-
-                cb.putFiles(fileList);
-                db.setContent(cb);
-
-                event.consume();
-            }
-        });
-
-        tabela.setOnMouseReleased(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-            }
-        });
 
 
         tabela.setOnDragDropped(new EventHandler<DragEvent>() {
@@ -305,6 +290,7 @@ public class MainController implements Initializable {
                 }
 
                 event.setDropCompleted(success);
+                tabela.getSelectionModel().select(0);
                 event.consume();
             }
         });
@@ -333,17 +319,21 @@ public class MainController implements Initializable {
 
 
 
+
+
     private class SongRow extends TableRow<Song>{
         TableRow thisRow = this;
 
         public SongRow() {
 
+
+            //Gdy wykryje przeciąganie myszką
             setOnDragDetected(event -> {
                 if (getItem() == null) {
                     return;
                 }
 
-                Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+                Dragboard dragboard = startDragAndDrop(TransferMode.ANY);
                 ClipboardContent content = new ClipboardContent();
                 content.putString(getItem().toString());
                 Image photo = new Image("main/resources/next.png");
@@ -358,8 +348,9 @@ public class MainController implements Initializable {
                 if (event.getGestureSource() != thisRow &&
                         event.getDragboard().hasString()) {
                     event.acceptTransferModes(TransferMode.MOVE);
+                } else {
+                    event.acceptTransferModes(TransferMode.ANY);
                 }
-
                 event.consume();
             });
 
@@ -382,12 +373,16 @@ public class MainController implements Initializable {
 
 
             setOnDragDropped(event -> {
+
                 if (getItem() == null) {
                     return;
                 }
 
                 Dragboard db = event.getDragboard();
                 boolean success = false;
+
+
+
 
                 if (db.hasString()) {
                     ObservableList<Song> items = getTableView().getItems();
@@ -399,8 +394,6 @@ public class MainController implements Initializable {
                     int draggedIdx = itemsStr.indexOf(db.getString());
                     int thisIdx = itemsStr.indexOf(getItem().toString());
 
-                    System.out.println(draggedIdx + " indeks ciagniety");
-                    System.out.println(thisIdx + " indeks drugi");
 
                     if(draggedIdx<thisIdx) {
                         mp3Player.getMp3List().getLista().add(thisIdx, mp3Player.getMp3List().getLista().get(draggedIdx) );
@@ -419,6 +412,28 @@ public class MainController implements Initializable {
 
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -16,14 +16,22 @@
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin></Button>
-            <Button id="play-button-css" fx:id="PlayStopButton" mnemonicParsing="false">
+
+            <Button id="stop-button-css" fx:id="StopButton" mnemonicParsing="false" text="Button">
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin></Button>
+
+            <Button id="play-button-css" fx:id="PlayPauseButton" mnemonicParsing="false">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin></Button>
+
             <Button id="next-button-css" fx:id="NextButton" mnemonicParsing="false">
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin></Button>
+
             <VBox HBox.hgrow="NEVER">
                <children>
                   <Label fx:id="VolumeLabel" text="Label" VBox.vgrow="NEVER" />
