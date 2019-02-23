@@ -16,13 +16,7 @@ public class ControlClosePaneController implements Initializable {
     private Slider TimeMinuteSlider;
 
     @FXML
-    private Slider TimeHourSlider;
-
-    @FXML
-    private Label SetTimeMinuteLabel;
-
-    @FXML
-    private Label SetTimeHourLabel;
+    private Label TimeMinuteLabel;
 
     @FXML
     private Button StartButton;
@@ -40,29 +34,15 @@ public class ControlClosePaneController implements Initializable {
         TimeMinuteSlider = timeMinuteSlider;
     }
 
-    public Slider getTimeHourSlider() {
-        return TimeHourSlider;
+
+    public Label getTimeMinuteLabel() {
+        return TimeMinuteLabel;
     }
 
-    public void setTimeHourSlider(Slider timeHourSlider) {
-        TimeHourSlider = timeHourSlider;
+    public void setTimeMinuteLabel(Label setTimeMinuteLabel) {
+        TimeMinuteLabel = setTimeMinuteLabel;
     }
 
-    public Label getSetTimeMinuteLabel() {
-        return SetTimeMinuteLabel;
-    }
-
-    public void setSetTimeMinuteLabel(Label setTimeMinuteLabel) {
-        SetTimeMinuteLabel = setTimeMinuteLabel;
-    }
-
-    public Label getSetTimeHourLabel() {
-        return SetTimeHourLabel;
-    }
-
-    public void setSetTimeHourLabel(Label setTimeHourLabel) {
-        SetTimeHourLabel = setTimeHourLabel;
-    }
 
     public Button getStartButton() {
         return StartButton;

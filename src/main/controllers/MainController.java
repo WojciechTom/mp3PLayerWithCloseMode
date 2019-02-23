@@ -40,10 +40,12 @@ public class MainController implements Initializable {
     private Mp3Player mp3Player;
     private ObservableList<Song> tabelka;
     private Mp3Parser mp3Parser;
+    private CloseSerwis closeSerwis;
     private int currentSong = 0;
     private int index;
     boolean onList = false;
     private int movedSongIndex;
+    private Thread close;
 
 
 
@@ -107,7 +109,9 @@ public class MainController implements Initializable {
         });
 
 
-        itemDelAllSongs.setOnAction(Event -> mp3Player.getMp3List().getLista().clear());
+        itemDelAllSongs.setOnAction(Event ->
+                mp3Player.getMp3List().removedAllSongs()
+        );
 
 
 
@@ -324,12 +328,13 @@ public class MainController implements Initializable {
     private class SongRow extends TableRow<Song>{
         TableRow thisRow = this;
 
+
         public SongRow() {
 
 
             //Gdy wykryje przeciąganie myszką
             setOnDragDetected(event -> {
-                if (getItem() == null) {
+                if (getItem() == null || getItem().getTitle() == "** TOTAL **") {
                     return;
                 }
 
@@ -393,6 +398,8 @@ public class MainController implements Initializable {
 
                     int draggedIdx = itemsStr.indexOf(db.getString());
                     int thisIdx = itemsStr.indexOf(getItem().toString());
+                    System.out.println(draggedIdx + "ciągniety");
+                    System.out.println(thisIdx + "indeks komórki nad");
 
 
                     if(draggedIdx<thisIdx) {
@@ -418,30 +425,10 @@ public class MainController implements Initializable {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     private void configSlideBar(){
         Slider songTimeSlid = controlPaneController.getSongTimeSlider();
 
 
-        //
         mp3Player.getMediaPlayer().setOnReady(new Runnable() {
             @Override
             public void run() {
@@ -473,15 +460,28 @@ public class MainController implements Initializable {
     }
 
 
+    private void configCloseBar (){
+        Slider closeTimeSlider = controlClosePaneController.getTimeMinuteSlider();
+        Label lab = controlClosePaneController.getTimeMinuteLabel();
+
+        closeSerwis.getmTime().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                lab.setText(String.valueOf(newValue));
+            }
+        });
+
+    }
+
+
 
 
     private void configClosePane(){
         Button startBut = controlClosePaneController.getStartButton();
-        Label timeMinuteLab = controlClosePaneController.getSetTimeMinuteLabel();
-        Label timeHourLab = controlClosePaneController.getSetTimeHourLabel();
+        Label timeMinuteLab = controlClosePaneController.getTimeMinuteLabel();
         Slider mSlid = controlClosePaneController.getTimeMinuteSlider();
-        Slider hSlid = controlClosePaneController.getTimeHourSlider();
-        CloseSerwis closeSerwis = new CloseSerwis(startBut, mSlid);
+        closeSerwis = new CloseSerwis(startBut, mSlid);
+
 
 
         //bindowanie suwaka minutowego z labelem
@@ -495,14 +495,6 @@ public class MainController implements Initializable {
         //timeMinuteLab.textProperty().bindBidirectional()
 
 
-        //bindowanie suwaka godzinowego z labelem
-        hSlid.setValue(0);
-        StringProperty labHTime = timeHourLab.textProperty();
-        StringExpression slidH = Bindings.format("%.0f",  hSlid.valueProperty());
-        labHTime.bind(slidH);
-        hSlid.valueProperty().bindBidirectional(closeSerwis.gethTime());
-
-
 
         //przechwytywania akcji z przycisku START
         startBut.setOnAction(new EventHandler<ActionEvent>() {
@@ -512,19 +504,19 @@ public class MainController implements Initializable {
                 if(startBut.getText().equals("START")){
                     startBut.setText("STOP");
                     mSlid.setDisable(true);
-                    hSlid.setDisable(true);
 
-                    int secondToClose =  60*(Integer.parseInt(timeMinuteLab.textProperty().getValue()) + 60*Integer.parseInt(timeHourLab.textProperty().getValue()));
+                    int secondToClose =  60*(Integer.parseInt(timeMinuteLab.textProperty().getValue()));
                     CloseSerwis closeSerwis = new CloseSerwis(startBut, mSlid);
-                    Thread close = new Thread(closeSerwis);
+                    close = new Thread(closeSerwis);
                     closeSerwis.setCzas(secondToClose);
+                    configCloseBar();
                     close.start();
 
 
                 } else {
                     startBut.setText("START");
                     mSlid.setDisable(false);
-                    hSlid.setDisable(false);
+                    close.interrupt();
 
                 }
             }

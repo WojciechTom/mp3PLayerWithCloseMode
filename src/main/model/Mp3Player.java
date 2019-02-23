@@ -75,8 +75,6 @@ public class Mp3Player {
 
     public double getLoadedSongLenght(){
         if(media != null){
-//            double sekundy = media.getDuration().toSeconds();
-//            double minuty = Math.floor(sekundy/60) +  sekundy%60/100;
             return media.getDuration().toSeconds()  ;
         } else {
             return 0;

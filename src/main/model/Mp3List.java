@@ -11,18 +11,33 @@ import java.io.*;
 public class Mp3List {
 
     private ObservableList<Song> lista;
-
+    private double totalTime = 0;
+    private Song end;
 
     public Mp3List() {
         this.lista = FXCollections.observableArrayList();
+        end = new Song("** TOTAL **", 0.0, "");
+        lista.add(end);
     }
 
     public ObservableList<Song> getLista() {
         return lista;
     }
 
-    public void addSong(Song song){
+    public void removedAllSongs(){
+        lista.clear();
+        end = new Song("** TOTAL **", 0.0, "");
+        lista.add(end);
+    }
+
+    public void addSong(Song song) {
+
+        lista.remove(lista.indexOf(end));
         lista.add(song);
+
+        totalTime = totalTime + song.getTime();
+        end = new Song("** TOTAL **", totalTime,"");
+        lista.add(end);
     }
 
     public void fingSongBytitle(String title){
